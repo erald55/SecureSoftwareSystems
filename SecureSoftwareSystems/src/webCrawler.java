@@ -9,6 +9,10 @@ import java.util.HashSet;
 
 public class webCrawler {
     private HashSet<String> links;
+    //static String mainUrl="https://www.politico.com/";
+    static String mainUrl="https://www.newegg.com/";
+    //static String mainUrl="https://old.reddit.com/r/leagueoflegends/";
+
 
     public webCrawler() {
         links = new HashSet<String>();
@@ -17,10 +21,10 @@ public class webCrawler {
     public void getPageLinks(String URL) {
         //4. Check if you have already crawled the URLs
         //(we are intentionally not checking for duplicate content in this example)
-        if (!links.contains(URL)) {
+        if (!links.contains(URL) && URL.contains(mainUrl)) {
             try {
                 //4. (i) If not add it to the index
-                if (links.add(URL)) {
+                if (links.add(URL) && (URL.contains("Product") || URL.contains("Item"))) {
                     System.out.println(URL);
                 }
 
@@ -40,24 +44,20 @@ public class webCrawler {
     }
 
     public static void main(String[] args) throws IOException {
-        //1. Pick a URL from the frontier
-        String mainUrl="https://old.reddit.com/r/leagueoflegends/";
+        //Adds robots.txt to the site url in order to access the robots.txt file
         String robotsUrl=mainUrl +"robots.txt";
 
+        //Allows us to access the robots.txt url
         Document robotDocument = Jsoup.connect(robotsUrl).get();
-        String robotsBody=robotDocument.body().text();
-        String robotDeny="User-agent: * Disallow: /";
-        if (robotsBody.equalsIgnoreCase(robotDeny)){
-            System.out.println("yeahh boyyy");
+
+        //searching the robots.txt file in order to make the crawler follow the rules
+        Elements robotsOnPage = robotDocument.body().getElementsMatchingText("User-agent: \\* Disallow: \\/\\w");
+        if (robotsOnPage.size()!=0){
+            System.out.println("Yeahh boy");
+            new webCrawler().getPageLinks("https://www.newegg.com/p/pl?d=monitor#");
         }
 
-        /*Elements robotsOnPage = robotDocument.body().getElementsContainingText(("User-agent: *" ));
-        if (robotsOnPage.size()>0){
-            System.out.println("Yeahh boy");
 
-        }*/
-
-        //new webCrawler().getPageLinks(mainUrl);
 
     }
 }
